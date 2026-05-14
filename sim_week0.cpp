@@ -6,8 +6,36 @@
 
 const double g= 9.81;
 
+const double rho = 1.225;
+
+const double mu  = 1.81e-5; 
+
 double speed(double a, double t){
     return  a*t;
+}
+
+//drag 
+double getCd(double velocity, double radius) {
+    double Re = (rho * velocity * (2 * radius)) / mu;
+
+    if (Re < 1) return 24.0 / Re;               // Stokes Flow
+    if (Re < 1000) return 24.0 / Re + 0.44;     // Intermediate
+    return 0.44;                                // Fully Turbulent (Sphere)
+}
+
+double acceleration(double G, double mass, double velocity,  double radius){
+    double drag = 0;
+
+    if (velocity>0){
+        drag =  -0.5*getCd(velocity,radius)*rho*(pow(velocity,2))*M_PI*pow(radius,2)/mass;
+    } else if (velocity<0)
+    {
+        drag =  0.5*getCd(velocity,radius)*rho*(pow(velocity,2))*M_PI*pow(radius,2)/mass;
+    } else {
+        drag = 0;
+    }
+    
+    return -G + drag;
 }
 
 int main (){
@@ -16,6 +44,8 @@ int main (){
     double angle_rad = angel_deg * (M_PI/180);
     double velocity = 30;
     double height = 10 ; 
+    double mass = 2 ;
+    double radius = 0.5;
 
     double X= 0;
     double Y= height;
@@ -41,10 +71,12 @@ int main (){
         X+= U*dt;
         Y+=V*dt;
 
-        V+=speed(-g,dt);
+        U+=speed(acceleration(0,mass,U,radius),dt);
+        V+=speed(acceleration(g,mass,V,radius),dt);
 
         if (Y<=0){
-            V=-V;
+            V=-0.9*V; //coeficient of restituion or how elastic or bouncy it is -> its pretty bouncy would exp measure this
+            Y=0; 
         }
 
         T+=dt;
