@@ -23,8 +23,10 @@ int main (){
     double U = velocity*cos(angle_rad);
     double V = velocity*sin(angle_rad);
 
-    // time steps
+    // time steps and limit of sim
     double dt=0.1;
+
+    double T_limit = 10;
 
     //creating file for csv and data post
 
@@ -32,7 +34,7 @@ int main (){
 
     data << "Time(s),X(m),Y(m)\n"; // headers
 
-    while(Y>=0){
+    while(T<T_limit){
 
         data << T << "," << X << "," << Y << "\n"; //writing data 
 
@@ -40,6 +42,10 @@ int main (){
         Y+=V*dt;
 
         V+=speed(-g,dt);
+
+        if (Y<=0){
+            V=-V;
+        }
 
         T+=dt;
     }
